@@ -6,6 +6,7 @@ A simple web application for searching movies using the OMDB API. Built with Rea
 
 - 🎬 Search for movies by title
 - 🍿 View movie details
+- ❤️ Add movies to a 'Favorites' list that persists in local storage
 - 📱 Responsive design
 
 ## Tech Stack
@@ -26,10 +27,21 @@ A simple web application for searching movies using the OMDB API. Built with Rea
 
 ### Configuration
 
-1.  Open `app/routes/home.tsx`.
-2.  Find the `apiKey` variable and replace `"your_api_key_here"` with your actual OMDB API key.
+1.  Clone the repository.
+2.  Create a new file named `.env` in the root of the project.
+3.  Add the following line to the `.env` file, replacing `your_api_key_here` with your actual OMDB API key:
+    ```
+    VITE_OMDB_API_KEY=your_api_key_here
+    ```
 
 ### Development
+
+Install dependencies:
+```bash
+npm install
+# or
+bun install
+```
 
 Start the development server:
 
@@ -71,7 +83,8 @@ A `Dockerfile` is included for easy containerization.
 
 2. Run the Docker container:
    ```bash
-   docker run -p 3000:3000 -e VITE_OMDB_API_KEY=$VITE_OMDB_API_KEY omdb-movie
+   docker run -p 3000:3000 -e VITE_OMDB_API_KEY=your_api_key_here omdb-movie
    ```
+   *Note: Replace `your_api_key_here` with your actual API key or load it from your environment.*
 
 The application will be accessible at `http://localhost:3000`.
