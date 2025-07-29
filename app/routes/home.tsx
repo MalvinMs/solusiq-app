@@ -1,5 +1,8 @@
 import type { Route } from "./+types/home";
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useOutletContext } from "react-router";
+import type { FavoriteContextType } from "~/layouts/app-layout";
+import { MovieCard } from "~/components/movie-card";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -13,19 +16,8 @@ export default function Home() {
   const [movies, setMovies] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [favorites, setFavorites] = useState<any[]>([]);
-
-
-  useEffect(() => {
-    const fav = localStorage.getItem("favorite_movies");
-    if (fav) {
-      setFavorites(JSON.parse(fav));
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("favorite_movies", JSON.stringify(favorites));
-  }, [favorites]);
+  const { favorites, isFavorite, handleLike, handleUnlike } =
+    useOutletContext<FavoriteContextType>();
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +26,7 @@ export default function Home() {
     setError("");
     setMovies([]);
     try {
-
-      const apiKey = '2082ce3d'
+      const apiKey = import.meta.env.VITE_OMDB_API_KEY;
       const res = await fetch(
         `https://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(query)}`
       );
@@ -51,66 +42,6 @@ export default function Home() {
       setLoading(false);
     }
   };
-
-  const isFavorite = (movie: any) =>
-    favorites.some((fav) => fav.imdbID === movie.imdbID);
-
-  const handleLike = (movie: any) => {
-    if (!isFavorite(movie)) {
-      setFavorites([movie, ...favorites]);
-    }
-  };
-
-  const handleUnlike = (movie: any) => {
-    setFavorites(favorites.filter((fav) => fav.imdbID !== movie.imdbID));
-  };
-
-  const MovieCard = ({ movie }: { movie: any }) => (
-    <div key={movie.imdbID} className="card bg-base-100 shadow-xl">
-      <figure>
-        <img
-          src={
-            movie.Poster !== "N/A"
-              ? movie.Poster
-              : "https://via.placeholder.com/300x445?text=No+Image"
-          }
-          alt={movie.Title}
-          className="w-full h-72 object-cover"
-        />
-      </figure>
-      <div className="card-body">
-        <h2 className="card-title">{movie.Title}</h2>
-        <p>{movie.Year}</p>
-        <div className="card-actions justify-between items-center">
-          <a
-            href={`https://www.imdb.com/title/${movie.imdbID}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-sm btn-outline"
-          >
-            Lihat di IMDB
-          </a>
-          {isFavorite(movie) ? (
-            <button
-              className="btn btn-sm btn-error"
-              onClick={() => handleUnlike(movie)}
-              title="Hapus dari Favorit"
-            >
-              ♥
-            </button>
-          ) : (
-            <button
-              className="btn btn-sm btn-outline"
-              onClick={() => handleLike(movie)}
-              title="Like"
-            >
-              ♡
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="p-10 min-h-screen bg-base-200">
@@ -135,7 +66,7 @@ export default function Home() {
             <h2 className="text-2xl font-semibold mb-4">Hasil Pencarian</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
               {movies.map((movie) => (
-                <MovieCard key={movie.imdbID} movie={movie} />
+                <MovieCard key={movie.imdbID} movie={movie} isFavorite={isFavorite} handleLike={handleLike} handleUnlike={handleUnlike} />
               ))}
             </div>
           </>
@@ -149,7 +80,7 @@ export default function Home() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {favorites.map((movie) => (
-              <MovieCard key={movie.imdbID} movie={movie} />
+              <MovieCard key={movie.imdbID} movie={movie} isFavorite={isFavorite} handleLike={handleLike} handleUnlike={handleUnlike} />
             ))}
           </div>
         )}
